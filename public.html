@@ -27,7 +27,7 @@ h1 { margin-bottom:20px; }
 }
 .available { background:green; }
 .occupied { background:red; }
-/* Special slot colors */
+
 .special-available { background:yellow; color:black; grid-column: 1 / span 2; justify-self:center; }
 .special-occupied { background:blue; color:white; grid-column: 1 / span 2; justify-self:center; }
 </style>
@@ -46,13 +46,11 @@ h1 { margin-bottom:20px; }
 var slots = {1:'available',2:'available',3:'available',4:'available'};
 var special = 'available';
 
-// Load saved state
 function loadData() {
   if(localStorage.getItem('parking')) slots = JSON.parse(localStorage.getItem('parking'));
   if(localStorage.getItem('special')) special = localStorage.getItem('special');
 }
 
-// Update the UI
 function updateUI() {
   for(let i=1;i<=4;i++){
     let s = document.getElementById('slot'+i);
@@ -65,11 +63,9 @@ function updateUI() {
   sp.innerText = 'Special\n'+special.charAt(0).toUpperCase()+special.slice(1);
 }
 
-// Initial load
 loadData();
 updateUI();
 
-// Listen for localStorage changes (live updates)
 window.addEventListener('storage', function(event) {
   if(event.key === 'parking' || event.key === 'special'){
     loadData();
@@ -79,3 +75,4 @@ window.addEventListener('storage', function(event) {
 </script>
 </body>
 </html>
+
