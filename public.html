@@ -8,32 +8,66 @@
 body { font-family: Arial, sans-serif; text-align:center; background:#eef2f3; padding:20px;}
 h1 { margin-bottom:20px; }
 .parking {
-  display:grid; 
-  grid-template-columns:repeat(2,150px); 
+  display:flex;  
   gap:20px; 
   justify-content:center;
 }
+
+.text {
+  background: linear-gradient(to right, aqua, yellow);
+  display: flex;
+  height: 70px;
+  width: 500px;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 40px;
+  text-align: center;
+  margin-left: auto;
+  margin-right: auto;
+  border-radius: 15px;
+  
+
+}
 .slot {
-  width:150px;
-  height:100px;
-  border-radius:10px;
-  display:flex;
+  width:200px;
+  height:350px;
+  border-radius:25px;
+  display:grid;
   align-items:center;
   justify-content:center;
   color:white;
-  font-size:18px;
+  font-size:25px;
   font-weight:bold;
   white-space:pre-line;
+  margin:30px;
+  border: 4px solid; 
+  border-color: black;
 }
-.available { background:green; }
-.occupied { background:red; }
+.available {
+  background: linear-gradient(to top, green, lightgreen);
+}
 
-.special-available { background:yellow; color:black; grid-column: 1 / span 2; justify-self:center; }
-.special-occupied { background:blue; color:white; grid-column: 1 / span 2; justify-self:center; }
+.occupied {
+  background: linear-gradient(to bottom, red, orange);
+}
+/* Special slot colors */
+.special-available { 
+  background:yellow; 
+  color: black;
+  grid-column: 1 / span 2;
+  justify-self:center; 
+}
+
+.special-occupied {
+  background:blue;
+  color:white;
+  grid-column: 1 / span 2;
+  justify-self:center;
+}
 </style>
 </head>
 <body>
-<h1>🚘 Parking Status (Live)</h1>
+<div class="text"> <h1>🚘 Parking Status (Live)</h1> </div>
 <div class="parking">
   <div id="slot1" class="slot">Slot 1</div>
   <div id="slot2" class="slot">Slot 2</div>
@@ -46,11 +80,13 @@ h1 { margin-bottom:20px; }
 var slots = {1:'available',2:'available',3:'available',4:'available'};
 var special = 'available';
 
+// Load saved state
 function loadData() {
   if(localStorage.getItem('parking')) slots = JSON.parse(localStorage.getItem('parking'));
   if(localStorage.getItem('special')) special = localStorage.getItem('special');
 }
 
+// Update the UI
 function updateUI() {
   for(let i=1;i<=4;i++){
     let s = document.getElementById('slot'+i);
@@ -63,9 +99,11 @@ function updateUI() {
   sp.innerText = 'Special\n'+special.charAt(0).toUpperCase()+special.slice(1);
 }
 
+// Initial load
 loadData();
 updateUI();
 
+// Listen for localStorage changes (live updates)
 window.addEventListener('storage', function(event) {
   if(event.key === 'parking' || event.key === 'special'){
     loadData();
@@ -75,4 +113,3 @@ window.addEventListener('storage', function(event) {
 </script>
 </body>
 </html>
-
