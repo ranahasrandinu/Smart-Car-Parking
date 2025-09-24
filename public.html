@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Public - Parking</title>
+<style>
+body { font-family: Arial, sans-serif; text-align:center; background:#eef2f3; padding:20px;}
+h1 { margin-bottom:20px; }
+.parking {
+  display:grid; 
+  grid-template-columns:repeat(2,150px); 
+  gap:20px; 
+  justify-content:center;
+}
+.slot {
+  width:150px;
+  height:100px;
+  border-radius:10px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  color:white;
+  font-size:18px;
+  font-weight:bold;
+  white-space:pre-line;
+}
+.available { background:green; }
+.occupied { background:red; }
+/* Special slot colors */
+.special-available { background:yellow; color:black; grid-column: 1 / span 2; justify-self:center; }
+.special-occupied { background:blue; color:white; grid-column: 1 / span 2; justify-self:center; }
+</style>
+</head>
+<body>
+<h1>🚘 Parking Status (Live)</h1>
+<div class="parking">
+  <div id="slot1" class="slot">Slot 1</div>
+  <div id="slot2" class="slot">Slot 2</div>
+  <div id="slot3" class="slot">Slot 3</div>
+  <div id="slot4" class="slot">Slot 4</div>
+  <div id="special" class="slot special-available">Special Park</div>
+</div>
+
+<script>
+var slots = {1:'available',2:'available',3:'available',4:'available'};
+var special = 'available';
+
+// Load saved state
+function loadData() {
+  if(localStorage.getItem('parking')) slots = JSON.parse(localStorage.getItem('parking'));
+  if(localStorage.getItem('special')) special = localStorage.getItem('special');
+}
+
+// Update the UI
+function updateUI() {
+  for(let i=1;i<=4;i++){
+    let s = document.getElementById('slot'+i);
+    s.className = 'slot '+slots[i];
+    s.innerText = 'Slot '+i+'\n'+slots[i].charAt(0).toUpperCase()+slots[i].slice(1);
+  }
+  
+  let sp = document.getElementById('special');
+  sp.className = special === 'available' ? 'slot special-available' : 'slot special-occupied';
+  sp.innerText = 'Special\n'+special.charAt(0).toUpperCase()+special.slice(1);
+}
+
+// Initial load
+loadData();
+updateUI();
+
+// Listen for localStorage changes (live updates)
+window.addEventListener('storage', function(event) {
+  if(event.key === 'parking' || event.key === 'special'){
+    loadData();
+    updateUI();
+  }
+});
+</script>
+</body>
+</html>

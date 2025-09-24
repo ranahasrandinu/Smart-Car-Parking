@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Admin - Parking</title>
+<style>
+body { font-family: Arial, sans-serif; text-align:center; background:#f4f4f4; padding:20px;}
+h1 { margin-bottom:20px; }
+.parking {
+  display:grid; 
+  grid-template-columns:repeat(2,150px); 
+  gap:20px; 
+  justify-content:center;
+}
+.slot {
+  width:150px;
+  height:100px;
+  border-radius:10px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  color:white;
+  font-size:18px;
+  font-weight:bold;
+  cursor:pointer;
+  white-space:pre-line;
+}
+.available { background:green; }
+.occupied { background:red; }
+/* Special slot colors */
+.special-available { background:yellow; color:black; grid-column: 1 / span 2; justify-self:center; cursor:pointer; }
+.special-occupied { background:blue; color:white; grid-column: 1 / span 2; justify-self:center; cursor:pointer; }
+</style>
+</head>
+<body>
+<h1>🚗 Admin Control</h1>
+<div class="parking">
+  <div id="slot1" class="slot available" onclick="toggleSlot(1)">Slot 1</div>
+  <div id="slot2" class="slot available" onclick="toggleSlot(2)">Slot 2</div>
+  <div id="slot3" class="slot available" onclick="toggleSlot(3)">Slot 3</div>
+  <div id="slot4" class="slot available" onclick="toggleSlot(4)">Slot 4</div>
+  <div id="special" class="slot special-available" onclick="toggleSpecial()">Special Park</div>
+</div>
+
+<script>
+var slots = {1:'available',2:'available',3:'available',4:'available'};
+var special = 'available';
+
+// Load saved state
+if(localStorage.getItem('parking')) slots = JSON.parse(localStorage.getItem('parking'));
+if(localStorage.getItem('special')) special = localStorage.getItem('special');
+
+// Update UI
+function updateUI(){
+  for(let i=1;i<=4;i++){
+    let s = document.getElementById('slot'+i);
+    s.className = 'slot '+slots[i];
+    s.innerText = 'Slot '+i+'\n'+slots[i].charAt(0).toUpperCase()+slots[i].slice(1);
+  }
+  
+  let sp = document.getElementById('special');
+  sp.className = special === 'available' ? 'slot special-available' : 'slot special-occupied';
+  sp.innerText = 'Special\n'+special.charAt(0).toUpperCase()+special.slice(1);
+}
+
+// Save state to localStorage (triggers live update)
+function saveData(){
+  localStorage.setItem('parking', JSON.stringify(slots));
+  localStorage.setItem('special', special);
+}
+
+// Toggle normal slots
+function toggleSlot(n){
+  slots[n] = slots[n] === 'available' ? 'occupied' : 'available';
+  updateUI();
+  saveData();
+}
+
+// Toggle special slot
+function toggleSpecial(){
+  special = special === 'available' ? 'occupied' : 'available';
+  updateUI();
+  saveData();
+}
+
+// Initial UI
+updateUI();
+</script>
+</body>
+</html>
