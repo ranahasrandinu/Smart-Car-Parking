@@ -28,7 +28,7 @@ h1 { margin-bottom:20px; }
 }
 .available { background:green; }
 .occupied { background:red; }
-
+/* Special slot colors */
 .special-available { background:yellow; color:black; grid-column: 1 / span 2; justify-self:center; cursor:pointer; }
 .special-occupied { background:blue; color:white; grid-column: 1 / span 2; justify-self:center; cursor:pointer; }
 </style>
@@ -47,9 +47,11 @@ h1 { margin-bottom:20px; }
 var slots = {1:'available',2:'available',3:'available',4:'available'};
 var special = 'available';
 
+// Load saved state
 if(localStorage.getItem('parking')) slots = JSON.parse(localStorage.getItem('parking'));
 if(localStorage.getItem('special')) special = localStorage.getItem('special');
 
+// Update UI
 function updateUI(){
   for(let i=1;i<=4;i++){
     let s = document.getElementById('slot'+i);
@@ -62,25 +64,28 @@ function updateUI(){
   sp.innerText = 'Special\n'+special.charAt(0).toUpperCase()+special.slice(1);
 }
 
+// Save state to localStorage (triggers live update)
 function saveData(){
   localStorage.setItem('parking', JSON.stringify(slots));
   localStorage.setItem('special', special);
 }
 
+// Toggle normal slots
 function toggleSlot(n){
   slots[n] = slots[n] === 'available' ? 'occupied' : 'available';
   updateUI();
   saveData();
 }
 
+// Toggle special slot
 function toggleSpecial(){
   special = special === 'available' ? 'occupied' : 'available';
   updateUI();
   saveData();
 }
 
+// Initial UI
 updateUI();
 </script>
 </body>
 </html>
-
