@@ -43,9 +43,9 @@
     <div id="special" class="slot special-available" onclick="toggleSpecial()">Special Park</div>
   </div>
 
-  <!-- Firebase SDK -->
-  <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-database.js"></script>
+  <!-- Firebase v8 CDN -->
+  <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
 
   <script>
     // Firebase config
@@ -61,13 +61,13 @@
     };
 
     // Init Firebase
-    const app = firebase.initializeApp(firebaseConfig);
+    firebase.initializeApp(firebaseConfig);
     const db = firebase.database();
 
+    // State
     let slots = {1:'available',2:'available',3:'available',4:'available'};
     let special = 'available';
 
-    // Update UI
     function updateUI(){
       for(let i=1;i<=4;i++){
         let s = document.getElementById('slot'+i);
@@ -79,19 +79,18 @@
       sp.innerText = 'Special\n'+special.charAt(0).toUpperCase()+special.slice(1);
     }
 
-    // Toggle slots
     function toggleSlot(n){
       slots[n] = slots[n] === 'available' ? 'occupied' : 'available';
-      firebase.database().ref('parking/slots').set(slots);
+      db.ref('parking/slots').set(slots);
     }
 
     function toggleSpecial(){
       special = special === 'available' ? 'occupied' : 'available';
-      firebase.database().ref('parking/special').set(special);
+      db.ref('parking/special').set(special);
     }
 
-    // Sync with Firebase
-    firebase.database().ref('parking').on('value', snapshot=>{
+    // Listen to Firebase changes
+    db.ref('parking').on('value', snapshot=>{
       if(snapshot.exists()){
         const data = snapshot.val();
         slots = data.slots || slots;
@@ -101,9 +100,9 @@
     });
 
     // Init DB if empty
-    firebase.database().ref('parking').once('value').then(snapshot=>{
+    db.ref('parking').once('value').then(snapshot=>{
       if(!snapshot.exists()){
-        firebase.database().ref('parking').set({slots:slots, special:special});
+        db.ref('parking').set({slots:slots, special:special});
       }
     });
   </script>
