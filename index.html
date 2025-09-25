@@ -47,20 +47,20 @@
     }
     .slot:active { transform: scale(0.97); }
     .available {
-      background: #4caf50;
+      background: linear-gradient(to top, green, lightgreen);
       color: white;
     }
     .occupied {
-      background: #f44336;
+      background: linear-gradient(to top, red, orange);
       color: white;
     }
     .special-available {
-      background: #ffeb3b;
+      background: linear-gradient(to top, yellow, white);
       color: #000;
       grid-column: span 2;
     }
     .special-occupied {
-      background: #1e88e5;
+      background: linear-gradient(to top, blue, lightblue);
       color: white;
       grid-column: span 2;
     }
@@ -72,6 +72,8 @@
       box-shadow: 0 2px 8px rgba(0,0,0,0.1);
       max-width: 400px;
       width: 100%;
+      border: 1px solid; 
+      border-color: black;
     }
     .hidden { display: none; }
   </style>
@@ -103,7 +105,7 @@
     <!-- Login -->
     <section id="loginBox" class="admin-panel">
       <h2>Admin Login</h2>
-      <input id="password" type="password" placeholder="Enter password" style="width:100%;padding:10px;margin:10px 0;border:1px solid #ccc;border-radius:8px;"/>
+      <input id="password" type="password" placeholder="Enter password" style="width:94%;padding:10px;margin:10px 0;border:1px solid #ccc;border-radius:8px;"/>
       <button onclick="checkLogin()" style="width:100%;padding:10px;background:#6200ee;color:white;border:none;border-radius:8px;">Login</button>
     </section>
   </main>
@@ -134,7 +136,7 @@
     // Login
     function checkLogin(){
       const pass = document.getElementById("password").value;
-      if(pass === "12345"){
+      if(pass === "incorrect"){
         isAdmin = true;
         document.getElementById("loginBox").classList.add("hidden");
         document.getElementById("adminPanel").classList.remove("hidden");
