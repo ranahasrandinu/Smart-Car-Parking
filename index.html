@@ -1,127 +1,184 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <title>Parking System</title>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Smart Car Parking</title>
+  <!-- Material 3 Design -->
+  <link href="https://cdn.jsdelivr.net/npm/@material/web@1.0.1/material.min.css" rel="stylesheet">
+  <script type="module" src="https://cdn.jsdelivr.net/npm/@material/web@1.0.1/material.min.js"></script>
+
   <style>
-    body { font-family: Arial, sans-serif; text-align: center; margin: 20px; }
-    .hidden { display: none; }
-    .slot, .special { 
-      width: 150px; height: 60px; margin: 10px; 
-      display: inline-flex; align-items: center; justify-content: center;
-      font-weight: bold; border-radius: 10px; cursor: pointer; 
+    body {
+      font-family: 'Roboto', sans-serif;
+      margin: 0;
+      background: #f4f6f9;
+      color: #202124;
     }
-    .available { background: yellow; }
-    .occupied { background: blue; color: white; }
-    h2 { margin-top: 30px; }
-    #login { margin-top: 50px; }
-    input[type="password"] { padding: 5px; font-size: 14px; }
-    button { padding: 6px 12px; margin: 5px; cursor: pointer; }
+    header {
+      background: #6200ee;
+      color: white;
+      padding: 16px;
+      text-align: center;
+    }
+    h1 { margin: 0; font-weight: 500; }
+    main {
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+    .parking {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+      gap: 16px;
+      margin-top: 20px;
+      width: 100%;
+      max-width: 600px;
+    }
+    .slot {
+      border-radius: 16px;
+      padding: 20px;
+      font-size: 18px;
+      font-weight: 600;
+      text-align: center;
+      cursor: default;
+      transition: transform 0.2s;
+    }
+    .slot:active { transform: scale(0.97); }
+    .available {
+      background: #4caf50;
+      color: white;
+    }
+    .occupied {
+      background: #f44336;
+      color: white;
+    }
+    .special-available {
+      background: #ffeb3b;
+      color: #000;
+      grid-column: span 2;
+    }
+    .special-occupied {
+      background: #1e88e5;
+      color: white;
+      grid-column: span 2;
+    }
+    .admin-panel {
+      margin-top: 30px;
+      background: white;
+      padding: 20px;
+      border-radius: 12px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+      max-width: 400px;
+      width: 100%;
+    }
+    .hidden { display: none; }
   </style>
 </head>
 <body>
+  <header>
+    <h1>🚘 Smart Car Parking</h1>
+  </header>
 
-  <!-- Login Section -->
-  <div id="login">
-    <h2>Admin Login</h2>
-    <input type="password" id="password" placeholder="Enter password">
-    <button onclick="checkLogin()">Login</button>
-    <p id="loginMsg" style="color:red;"></p>
-  </div>
+  <main>
+    <!-- Public Panel -->
+    <section>
+      <h2>Parking Status (Live)</h2>
+      <div class="parking">
+        <div id="slot1" class="slot">Slot 1</div>
+        <div id="slot2" class="slot">Slot 2</div>
+        <div id="slot3" class="slot">Slot 3</div>
+        <div id="slot4" class="slot">Slot 4</div>
+        <div id="special" class="slot">Special Park</div>
+      </div>
+    </section>
 
-  <!-- Admin Section -->
-  <div id="admin" class="hidden">
-    <h2>Admin Control</h2>
-    <div id="slotsAdmin"></div>
-    <div id="specialAdmin"></div>
-    <button onclick="logout()">Logout</button>
-  </div>
+    <!-- Admin Panel -->
+    <section id="adminPanel" class="admin-panel hidden">
+      <h2>Admin Controls</h2>
+      <p>You are logged in as <strong>Admin</strong>. Tap any slot to toggle.</p>
+    </section>
 
-  <!-- Public Section -->
-  <div id="public">
-    <h2>Public View</h2>
-    <div id="slotsPublic"></div>
-    <div id="specialPublic"></div>
-  </div>
+    <!-- Login -->
+    <section id="loginBox" class="admin-panel">
+      <h2>Admin Login</h2>
+      <input id="password" type="password" placeholder="Enter password" style="width:100%;padding:10px;margin:10px 0;border:1px solid #ccc;border-radius:8px;"/>
+      <button onclick="checkLogin()" style="width:100%;padding:10px;background:#6200ee;color:white;border:none;border-radius:8px;">Login</button>
+    </section>
+  </main>
+
+  <!-- Firebase SDKs -->
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
 
   <script>
-    // Parking data
-    let slots = [true, true, true, true]; // true = available
-    let special = true;
+    // Firebase Config
+    const firebaseConfig = {
+      apiKey: "AIzaSyBeohoozMFQ7QQQV5zTp8Vlpr2j3RVI2XA",
+      authDomain: "smartcarparking-368dd.firebaseapp.com",
+      databaseURL: "https://smartcarparking-368dd-default-rtdb.asia-southeast1.firebasedatabase.app/",
+      projectId: "smartcarparking-368dd",
+      storageBucket: "smartcarparking-368dd.appspot.com",
+      messagingSenderId: "1045857878180",
+      appId: "1:1045857878180:web:9db75fd7c978178b66a631",
+      measurementId: "G-KHXY1GQVBV"
+    };
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.database();
 
-    // Render functions
-    function renderPublic() {
-      const slotsDiv = document.getElementById("slotsPublic");
-      slotsDiv.innerHTML = "";
-      slots.forEach((s, i) => {
-        const div = document.createElement("div");
-        div.className = "slot " + (s ? "available" : "occupied");
-        div.innerText = `Slot ${i+1}: ${s ? "Available" : "Occupied"}`;
-        slotsDiv.appendChild(div);
-      });
-
-      const spDiv = document.getElementById("specialPublic");
-      spDiv.innerHTML = "";
-      const sp = document.createElement("div");
-      sp.className = "special " + (special ? "available" : "occupied");
-      sp.innerText = `Special Park: ${special ? "Available" : "Occupied"}`;
-      spDiv.appendChild(sp);
-    }
-
-    function renderAdmin() {
-      const slotsDiv = document.getElementById("slotsAdmin");
-      slotsDiv.innerHTML = "";
-      slots.forEach((s, i) => {
-        const div = document.createElement("div");
-        div.className = "slot " + (s ? "available" : "occupied");
-        div.innerText = `Slot ${i+1}: ${s ? "Available" : "Occupied"}`;
-        div.onclick = () => toggleSlot(i);
-        slotsDiv.appendChild(div);
-      });
-
-      const spDiv = document.getElementById("specialAdmin");
-      spDiv.innerHTML = "";
-      const sp = document.createElement("div");
-      sp.className = "special " + (special ? "available" : "occupied");
-      sp.innerText = `Special Park: ${special ? "Available" : "Occupied"}`;
-      sp.onclick = () => toggleSpecial();
-      spDiv.appendChild(sp);
-    }
-
-    // Toggle functions
-    function toggleSlot(i) {
-      slots[i] = !slots[i];
-      renderPublic();
-      renderAdmin();
-    }
-
-    function toggleSpecial() {
-      special = !special;
-      renderPublic();
-      renderAdmin();
-    }
+    let isAdmin = false;
+    let slots = {1:"available",2:"available",3:"available",4:"available"};
+    let special = "available";
 
     // Login
-    function checkLogin() {
-      const pwd = document.getElementById("password").value;
-      if (pwd === "12345") {
-        document.getElementById("login").classList.add("hidden");
-        document.getElementById("admin").classList.remove("hidden");
-        renderAdmin();
+    function checkLogin(){
+      const pass = document.getElementById("password").value;
+      if(pass === "12345"){
+        isAdmin = true;
+        document.getElementById("loginBox").classList.add("hidden");
+        document.getElementById("adminPanel").classList.remove("hidden");
+        updateUI();
       } else {
-        document.getElementById("loginMsg").innerText = "Wrong password!";
+        alert("Incorrect password.");
       }
     }
 
-    function logout() {
-      document.getElementById("login").classList.remove("hidden");
-      document.getElementById("admin").classList.add("hidden");
-      document.getElementById("password").value = "";
-      document.getElementById("loginMsg").innerText = "";
+    // Update UI
+    function updateUI(){
+      for(let i=1;i<=4;i++){
+        let s = document.getElementById("slot"+i);
+        s.className = "slot "+slots[i];
+        s.innerText = "Slot "+i+"\n"+slots[i].charAt(0).toUpperCase()+slots[i].slice(1);
+        if(isAdmin){ s.onclick = ()=>toggleSlot(i); } else { s.onclick = null; }
+      }
+      let sp = document.getElementById("special");
+      sp.className = special==="available" ? "slot special-available" : "slot special-occupied";
+      sp.innerText = "Special\n"+special.charAt(0).toUpperCase()+special.slice(1);
+      if(isAdmin){ sp.onclick = toggleSpecial; } else { sp.onclick = null; }
     }
 
-    // Initialize
-    renderPublic();
+    // Toggle
+    function toggleSlot(n){
+      slots[n] = (slots[n]==="available") ? "occupied" : "available";
+      db.ref("parking/slots").set(slots);
+    }
+    function toggleSpecial(){
+      special = (special==="available") ? "occupied" : "available";
+      db.ref("parking/special").set(special);
+    }
+
+    // Firebase listeners
+    db.ref("parking/slots").on("value",(snapshot)=>{
+      if(snapshot.exists()) slots = snapshot.val();
+      updateUI();
+    });
+    db.ref("parking/special").on("value",(snapshot)=>{
+      if(snapshot.exists()) special = snapshot.val();
+      updateUI();
+    });
+
+    updateUI();
   </script>
 </body>
 </html>
