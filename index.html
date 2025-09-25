@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Public - Parking</title>
+  <style>
+    body { font-family: Arial, sans-serif; text-align:center; background:#eef2f3; padding:20px;}
+    h1 { margin-bottom:20px; }
+    .parking {
+      display:flex;  
+      gap:20px; 
+      justify-content:center;
+      flex-wrap: wrap;
+    }
+    .text {
+      background: linear-gradient(to right, aqua, yellow);
+      display: flex;
+      height: 70px;
+      width: 500px;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 40px;
+      text-align: center;
+      margin-left: auto;
+      margin-right: auto;
+      border-radius: 15px;
+    }
+    .slot {
+      width:200px;
+      height:350px;
+      border-radius:25px;
+      display:grid;
+      align-items:center;
+      justify-content:center;
+      color:white;
+      font-size:25px;
+      font-weight:bold;
+      white-space:pre-line;
+      margin:30px;
+      border: 4px solid; 
+      border-color: black;
+    }
+    .available {
+      background: linear-gradient(to top, green, lightgreen);
+    }
+    .occupied {
+      background: linear-gradient(to bottom, red, orange);
+    }
+    .special-available { 
+      background:yellow; 
+      color: black;
+      grid-column: 1 / span 2;
+      justify-self:center; 
+    }
+    .special-occupied {
+      background:blue;
+      color:white;
+      grid-column: 1 / span 2;
+      justify-self:center;
+    }
+  </style>
+</head>
+<body>
+  <div class="text"> <h1>🚘 Parking Status (Live)</h1> </div>
+  <div class="parking">
+    <div id="slot1" class="slot">Slot 1</div>
+    <div id="slot2" class="slot">Slot 2</div>
+    <div id="slot3" class="slot">Slot 3</div>
+    <div id="slot4" class="slot">Slot 4</div>
+    <div id="special" class="slot special-available">Special Park</div>
+  </div>
+
+  <!-- Firebase SDK -->
+  <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-database.js"></script>
+
+  <script>
+    // Firebase config
+    const firebaseConfig = {
+      apiKey: "AIzaSyBeohoozMFQ7QQQV5zTp8Vlpr2j3RVI2XA",
+      authDomain: "smartcarparking-368dd.firebaseapp.com",
+      databaseURL: "https://smartcarparking-368dd-default-rtdb.asia-southeast1.firebasedatabase.app/",
+      projectId: "smartcarparking-368dd",
+      storageBucket: "smartcarparking-368dd.firebasestorage.app",
+      messagingSenderId: "1045857878180",
+      appId: "1:1045857878180:web:9db75fd7c978178b66a631",
+      measurementId: "G-KHXY1GQVBV"
+    };
+
+    // Init Firebase
+    const app = firebase.initializeApp(firebaseConfig);
+    const db = firebase.database();
+
+    let slots = {1:'available',2:'available',3:'available',4:'available'};
+    let special = 'available';
+
+    function updateUI(){
+      for(let i=1;i<=4;i++){
+        let s = document.getElementById('slot'+i);
+        s.className = 'slot '+slots[i];
+        s.innerText = 'Slot '+i+'\n'+slots[i].charAt(0).toUpperCase()+slots[i].slice(1);
+      }
+      let sp = document.getElementById('special');
+      sp.className = special === 'available' ? 'slot special-available' : 'slot special-occupied';
+      sp.innerText = 'Special\n'+special.charAt(0).toUpperCase()+special.slice(1);
+    }
+
+    // Sync with Firebase
+    firebase.database().ref('parking').on('value', snapshot=>{
+      if(snapshot.exists()){
+        const data = snapshot.val();
+        slots = data.slots || slots;
+        special = data.special || special;
+        updateUI();
+      }
+    });
+  </script>
+</body>
+</html>
